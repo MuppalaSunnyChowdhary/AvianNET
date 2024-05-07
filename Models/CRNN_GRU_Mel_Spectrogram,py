@@ -1,0 +1,41 @@
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, TimeDistributed, GRU, Dense, Dropout, Flatten
+from tensorflow.keras.layers import BatchNormalization
+
+# Assuming 'input_shape' is the shape of the Mel Spectrogram input (e.g., (time_steps, mel_bins, 1))
+# And 'num_classes' is the total number of bird species you are classifying
+input_shape = (None, None, 1)  # Replace with your actual input shape
+num_classes = 91  # Replace with your actual number of classes
+
+model = Sequential()
+
+# First, define the CNN layers
+model.add(Conv2D(32, (3, 3), activation='relu', input_shape=input_shape))
+model.add(MaxPooling2D((2, 2)))
+model.add(BatchNormalization())
+
+model.add(Conv2D(64, (3, 3), activation='relu'))
+model.add(MaxPooling2D((2, 2)))
+model.add(BatchNormalization())
+
+model.add(Conv2D(128, (3, 3), activation='relu'))
+model.add(MaxPooling2D((2, 2)))
+model.add(BatchNormalization())
+
+# Flatten the output of the CNN and apply dropout
+model.add(TimeDistributed(Flatten()))
+model.add(Dropout(0.5))
+
+# Add the recurrent GRU layer
+model.add(GRU(256, return_sequences=False))
+
+# Add a dense layer with dropout for prediction
+model.add(Dense(256, activation='relu'))
+model.add(Dropout(0.5))
+model.add(Dense(num_classes, activation='softmax'))
+
+# Compile the model
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+# Summary of the model
+model.summary()
